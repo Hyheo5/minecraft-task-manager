@@ -92,7 +92,15 @@ export default function GraphCanvas() {
           e.dataTransfer.dropEffect = 'copy';
         }}
         onNodeDragStop={(e, node) => {
-          // Empty, React flow handles node dragging
+          // Push new position to Supabase when user finishes dragging
+          if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            supabase.from('nodes').update({
+              position_x: node.position.x,
+              position_y: node.position.y,
+            }).eq('id', node.id).then(({ error }) => {
+              if (error) console.error("Failed to update node position after drag:", error);
+            });
+          }
         }}
         fitView
         className="react-flow-dark"

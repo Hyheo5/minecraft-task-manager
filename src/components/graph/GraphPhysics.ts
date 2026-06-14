@@ -37,33 +37,36 @@ export function useGraphPhysics() {
       .force('center', d3.forceCenter(400, 300))
       .force('collide', d3.forceCollide().radius(60)) // Prevent overlapping
       .on('tick', () => {
-        // Update the nodes in the Zustand store on every tick
-        // To prevent massive re-renders, we might want to batch this or only update on 'end'.
-        // For a live Obsidian feel, updating on tick is better but can be expensive.
-        simulationNodes.forEach((node) => {
-          if (node.x !== undefined && node.y !== undefined) {
-             // Let React Flow handle position updates organically
-            updateNode(node.id, undefined as any); // We need a way to update positions safely without overriding data.
-            // Actually, we should update the position specifically. Let's add a setNodePosition to our store or use updateNode.
-            // Wait, React Flow expects nodes to be updated. We'll mutate the objects directly for performance during tick,
-            // then force a state update, or just use React Flow's setNodes.
-            
-            // To properly integrate d3-force with Zustand:
-          }
-        });
+        // We mutate the objects directly for performance during tick.
+        // React Flow picks up the position changes organically if rendered,
+        // but we rely on the 'end' event to save the final positions to Zustand/Supabase.
       });
 
-      // Quick implementation: Update nodes in Zustand store after simulation cools down
+      // Update nodes in Zustand store after simulation cools down
       simulation.on('end', () => {
-        useGraphStore.setState((state) => ({
-           nodes: state.nodes.map(n => {
+        useGraphStore.setState((state) => {
+           const nextNodes = state.nodes.map(n => {
              const simNode = simulationNodes.find(sn => sn.id === n.id);
              if (simNode && simNode.x !== undefined && simNode.y !== undefined) {
                return { ...n, position: { x: simNode.x, y: simNode.y } };
              }
              return n;
-           })
-        }));
+           });
+           
+           // Push final calculated positions to Supabase
+           if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+             nextNodes.forEach(node => {
+               supabase.from('nodes').update({
+                 position_x: node.position.x,
+                 position_y: node.position.y,
+               }).eq('id', node.id).then(({ error }) => {
+                 if (error) console.error("Failed to update node position on physics end:", error);
+               });
+             });
+           }
+           
+           return { nodes: nextNodes };
+        });
       });
 
     return () => {

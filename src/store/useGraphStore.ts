@@ -88,7 +88,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         source: newEdge.source,
         target: newEdge.target,
         type: newEdge.type,
-      }).then();
+      }).then(({ error }) => {
+        if (error) console.error("Failed to insert edge:", error);
+      });
     }
   },
   addNode: (node) => {
@@ -97,11 +99,14 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       supabase.from('nodes').insert({
         id: node.id,
         title: node.data.title,
-        progress: node.data.progress,
-        properties: node.data.properties,
+        description: node.data.description || '',
+        progress: node.data.progress || 0,
+        properties: node.data.properties || {},
         position_x: node.position.x,
         position_y: node.position.y,
-      }).then();
+      }).then(({ error }) => {
+        if (error) console.error("Failed to insert node:", error);
+      });
     }
   },
   updateNode: (id, data) => {
@@ -116,12 +121,14 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       if (n) {
         supabase.from('nodes').update({
           title: n.data.title,
-          description: n.data.description,
+          description: n.data.description || '',
           progress: n.data.progress,
           properties: n.data.properties,
           position_x: n.position.x,
           position_y: n.position.y,
-        }).eq('id', id).then();
+        }).eq('id', id).then(({ error }) => {
+          if (error) console.error("Failed to update node:", error);
+        });
       }
     }
   },
@@ -131,7 +138,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       edges: get().edges.filter((e) => e.source !== id && e.target !== id),
     });
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      supabase.from('nodes').delete().eq('id', id).then();
+      supabase.from('nodes').delete().eq('id', id).then(({ error }) => {
+        if (error) console.error("Failed to delete node:", error);
+      });
     }
   },
 }));

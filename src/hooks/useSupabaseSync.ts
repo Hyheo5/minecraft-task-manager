@@ -17,18 +17,42 @@ export function useSupabaseSync() {
       ]);
 
       if (nodesRes.data) {
-        const mappedNodes = nodesRes.data.map((n) => ({
-          id: n.id,
-          type: 'pieChart',
-          position: { x: n.position_x, y: n.position_y },
-          data: {
-            title: n.title,
-            description: n.description,
-            progress: n.progress,
-            properties: n.properties,
-          },
-        }));
-        useGraphStore.setState({ nodes: mappedNodes });
+        if (nodesRes.data.length === 0) {
+          // Database is empty. Seed it with the initial nodes and edges so the graph isn't blank.
+          const { nodes, edges } = useGraphStore.getState();
+          nodes.forEach(n => {
+            supabase.from('nodes').insert({
+              id: n.id,
+              title: n.data.title,
+              description: n.data.description || '',
+              progress: n.data.progress || 0,
+              properties: n.data.properties || {},
+              position_x: n.position.x,
+              position_y: n.position.y,
+            }).then();
+          });
+          edges.forEach(e => {
+            supabase.from('edges').insert({
+              id: e.id,
+              source: e.source,
+              target: e.target,
+              type: e.type || 'directed',
+            }).then();
+          });
+        } else {
+          const mappedNodes = nodesRes.data.map((n) => ({
+            id: n.id,
+            type: 'pieChart',
+            position: { x: n.position_x, y: n.position_y },
+            data: {
+              title: n.title,
+              description: n.description,
+              progress: n.progress,
+              properties: n.properties,
+            },
+          }));
+          useGraphStore.setState({ nodes: mappedNodes });
+        }
       }
 
       if (edgesRes.data) {
