@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useGraphStore } from '@/store/useGraphStore';
 import * as d3 from 'd3-force';
 import { Node, Edge } from '@xyflow/react';
+import { supabase } from '@/services/supabaseClient';
 
 export function useGraphPhysics() {
   const { nodes, edges, updateNode } = useGraphStore();

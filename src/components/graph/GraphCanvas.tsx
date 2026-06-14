@@ -24,6 +24,7 @@ import MemberManager from '../team/MemberManager';
 import { useMultiplayerStore } from '@/store/useMultiplayerStore';
 import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import { useRealtimePresence } from '@/hooks/useRealtimePresence';
+import { supabase } from '@/services/supabaseClient';
 
 const nodeTypes: NodeTypes = {
   pieChart: PieChartNode,
