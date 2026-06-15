@@ -30,7 +30,7 @@ export const useUIStore = create<UIState>((set) => ({
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
   setIsSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
   setZoomLevel: (zoom) => set({ zoomLevel: zoom }),
-  physicsEnabled: false,
+  physicsEnabled: true,
   chargeStrength: -800,
   linkDistance: 150,
   gravityStrength: 50,
