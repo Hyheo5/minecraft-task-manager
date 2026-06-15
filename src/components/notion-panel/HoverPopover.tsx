@@ -16,10 +16,11 @@ export default function HoverPopover() {
     if (hoveredNode) {
       // Calculate screen position for the popover
       const { x, y } = flowToScreenPosition({
-        x: hoveredNode.position.x + 80, // Offset to the right
+        x: hoveredNode.position.x, 
         y: hoveredNode.position.y,
       });
-      setPosition({ x, y });
+      // Offset by pixels to avoid overlapping with node and its flags
+      setPosition({ x: x + 160, y: y + 40 });
     } else {
       setPosition(null);
     }

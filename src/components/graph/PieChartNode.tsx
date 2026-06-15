@@ -78,13 +78,19 @@ function PieChartNode({ id, data }: NodeProps<Node<CustomNodeData>>) {
 
       {/* Team Flags */}
       {activeUsers.length > 0 && (
-        <div className="absolute -top-2 -right-2 flex -space-x-1.5 z-10">
+        <div className="absolute -top-2 -right-2 flex -space-x-1.5 z-20">
           {activeUsers.map((user) => (
             <div
               key={user!.id}
-              className="w-5 h-5 rounded-full border border-neutral-800 flex items-center justify-center text-[9px] font-bold text-neutral-900 shadow-md"
+              className="w-5 h-5 rounded-full border border-neutral-800 flex items-center justify-center text-[9px] font-bold text-neutral-900 shadow-md cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
               style={{ backgroundColor: user!.flag_color }}
               title={user!.name}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                e.dataTransfer.setData('text/plain', user!.id);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
             >
               {user!.name.charAt(0)}
             </div>
