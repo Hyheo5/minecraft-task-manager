@@ -28,7 +28,7 @@ export default function MemberManager() {
               <div key={member.id} className="flex items-center justify-between group">
                 <div className={`flex items-center gap-3 p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer w-full ${!isActive ? 'opacity-50 grayscale' : ''}`}>
                   <div 
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-neutral-900 shadow-sm transition-transform group-hover:scale-110"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-neutral-900 shadow-sm transition-transform group-hover:scale-110 shrink-0"
                     style={{ backgroundColor: member.flag_color }}
                     draggable
                     onDragStart={(e) => {
@@ -38,7 +38,7 @@ export default function MemberManager() {
                   >
                     {member.name.charAt(0)}
                   </div>
-                  <div className="flex flex-col overflow-hidden">
+                  <div className="flex flex-col overflow-hidden min-w-0">
                     <span className="text-sm text-neutral-300 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                       {member.name} {member.id === localUser?.id && '(You)'}
                     </span>
@@ -49,15 +49,34 @@ export default function MemberManager() {
                     )}
                   </div>
                 </div>
-                {!isActive && (
-                  <button 
-                    onClick={() => removeUser(member.id)}
-                    className="text-neutral-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove user"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+                
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  {currentTask && (
+                    <button 
+                      onClick={() => {
+                        const { setMyFlag, updateFlags } = useMultiplayerStore.getState();
+                        if (member.id === localUser?.id) {
+                          setMyFlag(undefined);
+                        } else {
+                          updateFlags(member.id, undefined);
+                        }
+                      }}
+                      className="text-neutral-500 hover:text-orange-400 p-1"
+                      title="Unassign from task"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {!isActive && (
+                    <button 
+                      onClick={() => removeUser(member.id)}
+                      className="text-neutral-500 hover:text-red-400 p-1"
+                      title="Remove user from list"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
