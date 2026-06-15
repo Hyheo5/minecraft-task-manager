@@ -96,10 +96,20 @@ export default function GraphCanvas() {
         onNodeMouseLeave={onNodeMouseLeave}
         onDrop={(e) => {
           e.preventDefault();
+          const userId = e.dataTransfer.getData('text/plain');
+          const { localUser, setMyFlag, updateFlags } = useMultiplayerStore.getState();
+          if (userId) {
+            // If dropped on the canvas background, remove the flag
+            if (localUser && userId === localUser.id) {
+              setMyFlag(undefined);
+            } else {
+              updateFlags(userId, undefined);
+            }
+          }
         }}
         onDragOver={(e) => {
           e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
+          e.dataTransfer.dropEffect = 'move';
         }}
         onNodeDragStop={(e, node) => {
           // Push new position to Supabase when user finishes dragging

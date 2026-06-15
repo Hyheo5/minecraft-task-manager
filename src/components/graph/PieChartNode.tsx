@@ -26,8 +26,13 @@ function PieChartNode({ id, data }: NodeProps<Node<CustomNodeData>>) {
       onDrop={(e) => {
         e.preventDefault();
         const userId = e.dataTransfer.getData('text/plain');
+        const { localUser, setMyFlag } = useMultiplayerStore.getState();
         if (userId) {
-          updateFlags(userId, id);
+          if (localUser && userId === localUser.id) {
+            setMyFlag(id);
+          } else {
+            updateFlags(userId, id);
+          }
         }
       }}
     >
