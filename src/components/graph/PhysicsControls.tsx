@@ -10,7 +10,9 @@ export default function PhysicsControls() {
   const { 
     physicsEnabled, setPhysicsEnabled,
     chargeStrength, setChargeStrength,
-    linkDistance, setLinkDistance
+    linkDistance, setLinkDistance,
+    gravityStrength, setGravityStrength,
+    centralForceStrength, setCentralForceStrength
   } = useUIStore();
 
   return (
@@ -57,6 +59,40 @@ export default function PhysicsControls() {
             onValueChange={(val) => {
               const newDistance = Array.isArray(val) || typeof val !== 'number' ? (val as readonly number[])[0] : val;
               setLinkDistance(newDistance);
+            }}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label className="text-xs text-neutral-400">Universal Gravity</Label>
+            <span className="text-xs font-mono">{gravityStrength}</span>
+          </div>
+          <Slider
+            value={[gravityStrength]}
+            min={0}
+            max={200}
+            step={5}
+            onValueChange={(val) => {
+              const newStrength = Array.isArray(val) || typeof val !== 'number' ? (val as readonly number[])[0] : val;
+              setGravityStrength(newStrength);
+            }}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label className="text-xs text-neutral-400">Central Attraction</Label>
+            <span className="text-xs font-mono">{centralForceStrength}</span>
+          </div>
+          <Slider
+            value={[centralForceStrength]}
+            min={0}
+            max={0.2}
+            step={0.01}
+            onValueChange={(val) => {
+              const newStrength = Array.isArray(val) || typeof val !== 'number' ? (val as readonly number[])[0] : val;
+              setCentralForceStrength(newStrength);
             }}
           />
         </div>

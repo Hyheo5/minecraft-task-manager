@@ -13,6 +13,7 @@ export default function QuickAddInput() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      if (e.nativeEvent.isComposing) return;
       e.preventDefault();
       executeCommand(input);
       setInput('');

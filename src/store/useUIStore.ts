@@ -12,9 +12,13 @@ type UIState = {
   physicsEnabled: boolean;
   chargeStrength: number;
   linkDistance: number;
+  gravityStrength: number;
+  centralForceStrength: number;
   setPhysicsEnabled: (enabled: boolean) => void;
   setChargeStrength: (strength: number) => void;
   setLinkDistance: (distance: number) => void;
+  setGravityStrength: (strength: number) => void;
+  setCentralForceStrength: (strength: number) => void;
 };
 
 export const useUIStore = create<UIState>((set) => ({
@@ -29,7 +33,11 @@ export const useUIStore = create<UIState>((set) => ({
   physicsEnabled: false,
   chargeStrength: -800,
   linkDistance: 150,
+  gravityStrength: 50,
+  centralForceStrength: 0.05,
   setPhysicsEnabled: (enabled) => set({ physicsEnabled: enabled }),
   setChargeStrength: (strength) => set({ chargeStrength: strength }),
   setLinkDistance: (distance) => set({ linkDistance: distance }),
+  setGravityStrength: (strength) => set({ gravityStrength: strength }),
+  setCentralForceStrength: (strength) => set({ centralForceStrength: strength }),
 }));

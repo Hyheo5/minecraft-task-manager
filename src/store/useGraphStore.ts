@@ -78,12 +78,13 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     });
   },
   onConnect: (connection: Connection) => {
-    const newEdge = { ...connection, type: 'directed' } as Edge;
+    const edgeId = `e_${connection.source}-${connection.target}`;
+    const newEdge = { ...connection, id: edgeId, type: 'directed' } as Edge;
     set({
       edges: addEdge(newEdge, get().edges),
     });
     // Push to Supabase if configured
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && newEdge.id) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       supabase.from('edges').insert({
         id: newEdge.id,
         source: newEdge.source,

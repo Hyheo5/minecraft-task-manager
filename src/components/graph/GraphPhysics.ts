@@ -7,7 +7,7 @@ import { supabase } from '@/services/supabaseClient';
 
 export function useGraphPhysics() {
   const { nodes, edges } = useGraphStore();
-  const { physicsEnabled, chargeStrength, linkDistance } = useUIStore();
+  const { physicsEnabled, chargeStrength, linkDistance, gravityStrength, centralForceStrength } = useUIStore();
   
   const simulationRef = useRef<d3.Simulation<any, any> | null>(null);
   const simNodesRef = useRef<any[]>([]);
@@ -39,7 +39,9 @@ export function useGraphPhysics() {
       .forceSimulation(simulationNodes)
       .force('link', d3.forceLink(simulationLinks).id((d: any) => d.id).distance(linkDistance))
       .force('charge', d3.forceManyBody().strength(chargeStrength))
-      .force('center', d3.forceCenter(400, 300))
+      .force('universalGravity', d3.forceManyBody().strength(gravityStrength))
+      .force('centerX', d3.forceX(400).strength(centralForceStrength))
+      .force('centerY', d3.forceY(300).strength(centralForceStrength))
       .force('collide', d3.forceCollide().radius(80)) // slightly larger radius for pie charts
       .alphaDecay(0.05);
 
@@ -97,7 +99,7 @@ export function useGraphPhysics() {
       simulation.stop();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edges.length, nodes.length, physicsEnabled, chargeStrength, linkDistance]);
+  }, [edges.length, nodes.length, physicsEnabled, chargeStrength, linkDistance, gravityStrength, centralForceStrength]);
 
   // 2. Sync React Flow dragging state to the simulation
   useEffect(() => {
