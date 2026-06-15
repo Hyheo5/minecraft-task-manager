@@ -55,9 +55,13 @@ Nodes are more than just circles; they are like mini Notion pages.
 
 Because this is a multiplayer tool, you can let your friends know exactly what you are working on in real-time.
 
-- **The Team Sidebar**: In the top-right corner, you'll see a list of your online team members.
-- **Assigning Yourself**: Click and drag your colored avatar (flag) from the sidebar and **drop it onto a task node**.
-- **Live Status**: Your flag will snap to the node. Everyone else looking at the website will instantly see your flag appear there, letting them know: *"I am currently working on this!"*
+- **Joining the Workspace**: When you first open the app, you'll be asked to enter your name. You'll automatically receive a colored avatar.
+- **The Team Sidebar**: In the top-right corner, you'll see a list of your team members.
+  - **Active Members**: Displayed in full color.
+  - **Inactive Members**: Displayed in grayscale (faded). You can remove them from your view by clicking the `x` next to their name.
+- **Assigning Tasks**: Click and drag your colored avatar (flag) from the sidebar and **drop it onto a task node**.
+- **Live Status**: Your flag will snap to the node. Everyone else looking at the website will instantly see your flag appear there, letting them know: *"I am currently working on this!"* The team window will also display the name of the task you are working on.
+- **Unassigning Tasks**: To remove yourself (or anyone else) from a task, you can simply click the orange `x` button next to the task name in the Team window, or drag the flag off the node and drop it onto the empty dark canvas.
 
 ---
 
@@ -65,8 +69,8 @@ Because this is a multiplayer tool, you can let your friends know exactly what y
 
 If your graph becomes too messy, you can use the built-in physics engine to automatically space out and align your tasks.
 
-- **Enable Physics**: Open the **Graph Physics** panel in the top-right corner and toggle the switch. The nodes will instantly start pushing away from each other.
-- **Adjust Forces**: Use the sliders to change the **Repel Force** (how hard nodes push apart) and the **Link Distance** (how long the arrows try to be).
+- **Enable Physics**: Physics are enabled by default. You can toggle them by opening the **Settings** menu (the gear icon in the top-right corner) and toggling the switch under the Graph Physics section. The nodes will automatically push away from each other.
+- **Adjust Forces**: Use the sliders in the Settings menu to change the **Repel Force** (how hard nodes push apart), the **Link Distance** (how long the arrows try to be), and other parameters.
 - **Freeze Layout**: Once your tasks have settled into a clean, readable shape, toggle physics off to freeze them in place and save their locations for your team.
 
 ---
