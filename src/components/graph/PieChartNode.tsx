@@ -21,10 +21,12 @@ function PieChartNode({ id, data }: NodeProps<Node<CustomNodeData>>) {
       className="relative flex items-center group cursor-pointer bg-neutral-900/90 backdrop-blur-md border border-neutral-700/50 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:border-neutral-500 py-1.5 px-2 pr-4"
       onDragOver={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         e.dataTransfer.dropEffect = 'copy';
       }}
       onDrop={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         const userId = e.dataTransfer.getData('text/plain');
         const { localUser, setMyFlag } = useMultiplayerStore.getState();
         if (userId) {
