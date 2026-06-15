@@ -1,4 +1,4 @@
-import { BaseEdge, EdgeProps, getBezierPath } from '@xyflow/react';
+import { BaseEdge, EdgeProps, getStraightPath } from '@xyflow/react';
 
 export default function DirectedEdge({
   sourceX,
@@ -10,13 +10,11 @@ export default function DirectedEdge({
   style = {},
   markerEnd,
 }: EdgeProps) {
-  const [edgePath] = getBezierPath({
+  const [edgePath] = getStraightPath({
     sourceX,
     sourceY,
-    sourcePosition,
     targetX,
     targetY,
-    targetPosition,
   });
 
   return (

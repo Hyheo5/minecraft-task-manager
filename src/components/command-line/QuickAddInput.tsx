@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useGraphStore } from '@/store/useGraphStore';
 import { parseCommand, generateId } from '@/utils/stringParser';
+import { useReactFlow } from '@xyflow/react';
 import { Input } from '@/components/ui/input';
 
 export default function QuickAddInput() {
   const [input, setInput] = useState('');
   const { nodes, addNode, edges, onConnect } = useGraphStore();
+  const { screenToFlowPosition } = useReactFlow();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -26,10 +28,25 @@ export default function QuickAddInput() {
         const id = generateId(cmd.nodeName);
         // Don't add if already exists
         if (!nodes.find(n => n.id === id)) {
+          // Calculate center of screen
+          const center = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          };
+          
+          // Add some jitter so they don't spawn exactly on top of each other
+          const jitterX = (Math.random() - 0.5) * 50;
+          const jitterY = (Math.random() - 0.5) * 50;
+          
+          const position = screenToFlowPosition({
+            x: center.x + jitterX,
+            y: center.y + jitterY,
+          });
+
           addNode({
             id,
             type: 'pieChart',
-            position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+            position,
             data: {
               title: cmd.nodeName,
               progress: 0,

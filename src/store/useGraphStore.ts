@@ -25,6 +25,7 @@ type GraphState = {
   addNode: (node: Node<CustomNodeData>) => void;
   updateNode: (id: string, data: Partial<CustomNodeData>) => void;
   deleteNode: (id: string) => void;
+  deleteEdge: (id: string) => void;
   // TODO: Add properties management actions
 };
 
@@ -140,6 +141,20 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       supabase.from('nodes').delete().eq('id', id).then(({ error }) => {
         if (error) console.error("Failed to delete node:", error);
+      });
+      // also explicitly delete edges if not using cascade
+      supabase.from('edges').delete().or(`source.eq.${id},target.eq.${id}`).then(({ error }) => {
+        if (error) console.error("Failed to delete edges for node:", error);
+      });
+    }
+  },
+  deleteEdge: (id) => {
+    set({
+      edges: get().edges.filter((e) => e.id !== id),
+    });
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      supabase.from('edges').delete().eq('id', id).then(({ error }) => {
+        if (error) console.error("Failed to delete edge:", error);
       });
     }
   },

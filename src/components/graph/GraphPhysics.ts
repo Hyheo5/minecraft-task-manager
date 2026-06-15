@@ -1,15 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { useGraphStore } from '@/store/useGraphStore';
+import { useUIStore } from '@/store/useUIStore';
 import * as d3 from 'd3-force';
 import { Node, Edge } from '@xyflow/react';
 import { supabase } from '@/services/supabaseClient';
 
 export function useGraphPhysics() {
   const { nodes, edges, updateNode } = useGraphStore();
+  const { physicsEnabled, chargeStrength, linkDistance } = useUIStore();
 
   useEffect(() => {
-    // Only initialize or re-run if we have nodes
-    if (nodes.length === 0) return;
+    // Only initialize or re-run if we have nodes and physics is enabled
+    if (nodes.length === 0 || !physicsEnabled) return;
 
     // We don't want to constantly re-run the whole simulation on every tiny drag update from React Flow.
     // In a real sophisticated app, we'd sync d3 alpha with React Flow drag events.
@@ -32,9 +34,9 @@ export function useGraphPhysics() {
       .forceSimulation(simulationNodes)
       .force(
         'link',
-        d3.forceLink(simulationLinks).id((d: any) => d.id).distance(150)
+        d3.forceLink(simulationLinks).id((d: any) => d.id).distance(linkDistance)
       )
-      .force('charge', d3.forceManyBody().strength(-800)) // Repel each other
+      .force('charge', d3.forceManyBody().strength(chargeStrength)) // Repel each other
       .force('center', d3.forceCenter(400, 300))
       .force('collide', d3.forceCollide().radius(60)) // Prevent overlapping
       .on('tick', () => {
@@ -74,6 +76,5 @@ export function useGraphPhysics() {
       simulation.stop();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edges.length, nodes.length]); // Only re-run when counts change to avoid infinite loops
-
+  }, [edges.length, nodes.length, physicsEnabled, chargeStrength, linkDistance]); // Re-run when parameters change
 }

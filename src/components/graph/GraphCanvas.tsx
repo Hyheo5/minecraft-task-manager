@@ -21,6 +21,7 @@ import NodeModal from '../notion-panel/NodeModal';
 import HoverPopover from '../notion-panel/HoverPopover';
 import QuickAddInput from '../command-line/QuickAddInput';
 import MemberManager from '../team/MemberManager';
+import PhysicsControls from './PhysicsControls';
 import { useMultiplayerStore } from '@/store/useMultiplayerStore';
 import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import { useRealtimePresence } from '@/hooks/useRealtimePresence';
@@ -41,6 +42,8 @@ export default function GraphCanvas() {
     onNodesChange,
     onEdgesChange,
     onConnect,
+    deleteNode,
+    deleteEdge,
   } = useGraphStore();
 
   const { setSelectedNodeId, setHoveredNodeId } = useUIStore();
@@ -79,6 +82,12 @@ export default function GraphCanvas() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodesDelete={(deletedNodes) => {
+          deletedNodes.forEach((n) => deleteNode(n.id));
+        }}
+        onEdgesDelete={(deletedEdges) => {
+          deletedEdges.forEach((e) => deleteEdge(e.id));
+        }}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -119,6 +128,7 @@ export default function GraphCanvas() {
         <QuickAddInput />
         <NodeModal />
         <HoverPopover />
+        <PhysicsControls />
       </div>
     </ReactFlowProvider>
   );

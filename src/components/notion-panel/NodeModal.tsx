@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 
 export default function NodeModal() {
   const { selectedNodeId, setSelectedNodeId } = useUIStore();
-  const { nodes, updateNode, properties } = useGraphStore();
+  const { nodes, updateNode, deleteNode, properties } = useGraphStore();
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
@@ -112,6 +112,18 @@ export default function NodeModal() {
             value={description}
             onChange={handleDescriptionChange}
           />
+          
+          <hr className="border-neutral-800 my-6" />
+
+          <button
+            onClick={() => {
+              deleteNode(selectedNode.id);
+              setSelectedNodeId(null);
+            }}
+            className="w-full py-3 bg-red-950/50 hover:bg-red-900/50 text-red-400 font-medium rounded-lg transition-colors border border-red-900/30"
+          >
+            Delete Task
+          </button>
         </div>
       </SheetContent>
     </Sheet>
