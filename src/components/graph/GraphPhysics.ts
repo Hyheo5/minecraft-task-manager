@@ -2,27 +2,32 @@ import { useEffect, useRef } from 'react';
 import { useGraphStore } from '@/store/useGraphStore';
 import { useUIStore } from '@/store/useUIStore';
 import * as d3 from 'd3-force';
-import { Node, Edge } from '@xyflow/react';
+import { Node } from '@xyflow/react';
 import { supabase } from '@/services/supabaseClient';
 
 export function useGraphPhysics() {
-  const { nodes, edges, updateNode } = useGraphStore();
+  const { nodes, edges } = useGraphStore();
   const { physicsEnabled, chargeStrength, linkDistance } = useUIStore();
+  
+  const simulationRef = useRef<d3.Simulation<any, any> | null>(null);
+  const simNodesRef = useRef<any[]>([]);
 
+  // 1. Initialize simulation on nodes length/edges length change
   useEffect(() => {
-    // Only initialize or re-run if we have nodes and physics is enabled
     if (nodes.length === 0 || !physicsEnabled) return;
 
-    // We don't want to constantly re-run the whole simulation on every tiny drag update from React Flow.
-    // In a real sophisticated app, we'd sync d3 alpha with React Flow drag events.
-    // For this simple implementation, we'll run it once when nodes/edges change significantly
-    // or when we want to auto-layout.
-
-    const simulationNodes = nodes.map((n) => ({
-      ...n,
-      x: n.position.x,
-      y: n.position.y,
-    })) as (Node & d3.SimulationNodeDatum)[];
+    // Create persistent node references for the simulation
+    const simulationNodes = nodes.map((n) => {
+      const existing = simNodesRef.current.find(sn => sn.id === n.id);
+      return {
+        ...n,
+        x: existing?.x ?? n.position.x,
+        y: existing?.y ?? n.position.y,
+        fx: existing?.fx ?? null,
+        fy: existing?.fy ?? null,
+      };
+    });
+    simNodesRef.current = simulationNodes;
 
     const simulationLinks = edges.map((e) => ({
       ...e,
@@ -32,49 +37,95 @@ export function useGraphPhysics() {
 
     const simulation = d3
       .forceSimulation(simulationNodes)
-      .force(
-        'link',
-        d3.forceLink(simulationLinks).id((d: any) => d.id).distance(linkDistance)
-      )
-      .force('charge', d3.forceManyBody().strength(chargeStrength)) // Repel each other
+      .force('link', d3.forceLink(simulationLinks).id((d: any) => d.id).distance(linkDistance))
+      .force('charge', d3.forceManyBody().strength(chargeStrength))
       .force('center', d3.forceCenter(400, 300))
-      .force('collide', d3.forceCollide().radius(60)) // Prevent overlapping
-      .on('tick', () => {
-        // We mutate the objects directly for performance during tick.
-        // React Flow picks up the position changes organically if rendered,
-        // but we rely on the 'end' event to save the final positions to Zustand/Supabase.
-      });
+      .force('collide', d3.forceCollide().radius(80)) // slightly larger radius for pie charts
+      .alphaDecay(0.05);
 
-      // Update nodes in Zustand store after simulation cools down
-      simulation.on('end', () => {
-        useGraphStore.setState((state) => {
-           const nextNodes = state.nodes.map(n => {
-             const simNode = simulationNodes.find(sn => sn.id === n.id);
-             if (simNode && simNode.x !== undefined && simNode.y !== undefined) {
-               return { ...n, position: { x: simNode.x, y: simNode.y } };
+    simulation.on('tick', () => {
+      useGraphStore.setState((state) => {
+        let hasChanges = false;
+        const nextNodes = state.nodes.map((n) => {
+          if (n.dragging) return n; // Let React Flow control dragged nodes
+          const simNode = simulationNodes.find((sn) => sn.id === n.id);
+          if (simNode && simNode.x !== undefined && simNode.y !== undefined) {
+             // Only update if it moved significantly to avoid jitter
+             if (Math.abs(n.position.x - simNode.x) > 0.5 || Math.abs(n.position.y - simNode.y) > 0.5) {
+                hasChanges = true;
+                return { ...n, position: { x: simNode.x, y: simNode.y } };
              }
-             return n;
-           });
-           
-           // Push final calculated positions to Supabase
-           if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-             nextNodes.forEach(node => {
+          }
+          return n;
+        });
+        // Only trigger React re-render if there are actual position changes
+        return hasChanges ? { nodes: nextNodes } : state;
+      });
+    });
+
+    simulation.on('end', () => {
+      // Sync final positions to Supabase
+      useGraphStore.setState((state) => {
+         const nextNodes = state.nodes.map(n => {
+           const simNode = simulationNodes.find(sn => sn.id === n.id);
+           if (simNode && simNode.x !== undefined && simNode.y !== undefined) {
+             return { ...n, position: { x: simNode.x, y: simNode.y } };
+           }
+           return n;
+         });
+         
+         if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+           nextNodes.forEach(node => {
+             // Only update if no dragging is happening
+             if (!node.dragging) {
                supabase.from('nodes').update({
                  position_x: node.position.x,
                  position_y: node.position.y,
                }).eq('id', node.id).then(({ error }) => {
                  if (error) console.error("Failed to update node position on physics end:", error);
                });
-             });
-           }
-           
-           return { nodes: nextNodes };
-        });
+             }
+           });
+         }
+         return { nodes: nextNodes };
       });
+    });
+
+    simulationRef.current = simulation;
 
     return () => {
       simulation.stop();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edges.length, nodes.length, physicsEnabled, chargeStrength, linkDistance]); // Re-run when parameters change
+  }, [edges.length, nodes.length, physicsEnabled, chargeStrength, linkDistance]);
+
+  // 2. Sync React Flow dragging state to the simulation
+  useEffect(() => {
+    if (!simulationRef.current || !physicsEnabled) return;
+    
+    let isAnyDragging = false;
+    
+    nodes.forEach(n => {
+      const simNode = simNodesRef.current.find(sn => sn.id === n.id);
+      if (simNode) {
+        if (n.dragging) {
+          isAnyDragging = true;
+          simNode.fx = n.position.x;
+          simNode.fy = n.position.y;
+        } else {
+          // Release the node if it was previously dragged
+          simNode.fx = null;
+          simNode.fy = null;
+        }
+      }
+    });
+
+    // If a node is being dragged, keep the simulation 'hot'
+    if (isAnyDragging) {
+      simulationRef.current.alphaTarget(0.3).restart();
+    } else {
+      // Let it cool down naturally
+      simulationRef.current.alphaTarget(0);
+    }
+  }, [nodes, physicsEnabled]);
 }

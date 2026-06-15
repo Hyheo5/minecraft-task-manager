@@ -14,7 +14,7 @@ export default function PhysicsControls() {
   } = useUIStore();
 
   return (
-    <div className="absolute top-6 right-20 bg-neutral-900/90 backdrop-blur-md border border-neutral-700 p-4 rounded-xl shadow-2xl w-64 z-50 text-neutral-200">
+    <div className="w-full text-neutral-200">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-sm text-neutral-100 flex items-center gap-2">
           {physicsEnabled ? <Play className="w-4 h-4 text-green-400" /> : <Square className="w-4 h-4 text-neutral-500" />}

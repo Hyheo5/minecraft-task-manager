@@ -21,7 +21,7 @@ import NodeModal from '../notion-panel/NodeModal';
 import HoverPopover from '../notion-panel/HoverPopover';
 import QuickAddInput from '../command-line/QuickAddInput';
 import MemberManager from '../team/MemberManager';
-import PhysicsControls from './PhysicsControls';
+import SettingsMenu from '../ui/SettingsMenu';
 import { useMultiplayerStore } from '@/store/useMultiplayerStore';
 import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import { useRealtimePresence } from '@/hooks/useRealtimePresence';
@@ -128,7 +128,7 @@ export default function GraphCanvas() {
         <QuickAddInput />
         <NodeModal />
         <HoverPopover />
-        <PhysicsControls />
+        <SettingsMenu />
       </div>
     </ReactFlowProvider>
   );
